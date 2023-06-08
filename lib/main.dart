@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -28,36 +29,95 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  static const twentyFiveMinutes = 1500;
-  static const twentyMinutes = 2000;
+  static const MAXIMUM_ROUND = 4;
+  static const MAXIMUM_GOAL = 12;
+  static int TOTAL_MINUTES = 25;
+  static int TOTAL_SECONDS = 00;
+  static const List<String> TIMERS = ['15', '20', '25', '30', '35'];
+  static List<bool> selected = [false, false, true, false, false];
 
-  List<Widget> timeSetter() {
-    List<Widget> times = [];
-    for (var time in ['15', '20', '25', '30', '35']) {
-      times.add(Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Container(
-          decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(5)),
-              border: Border.all(color: Colors.white)),
-          width: 70,
-          height: 50,
-          alignment: Alignment.center,
-          child: Text(
-            time,
-            style: const TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ));
+  int minutes = TOTAL_MINUTES;
+  int seconds = TOTAL_SECONDS;
+  int round = 0;
+  int goal = 0;
+  bool isRunning = false;
+  late Timer timer;
+
+  void onTick(Timer timer) {
+    if (isEnd(minutes, seconds)) {
+      setState(() {
+        isRunning = false;
+      });
+      timer.cancel();
+      return;
     }
-    return times;
+    tickToc();
   }
 
-  Widget timeDisplay(String number) {
+  void tickToc() {
+    if (seconds == 0) {
+      setState(() {
+        minutes--;
+        seconds = 59;
+      });
+    } else {
+      setState(() {
+        seconds--;
+      });
+    }
+  }
+
+  void resetTimer() {
+    minutes = TOTAL_MINUTES;
+    seconds = TOTAL_SECONDS;
+  }
+
+  bool isEnd(int minutes, int seconds) {
+    if (minutes == 0 && seconds == 0) {
+      resetTimer();
+      incrementRoundAndGoal();
+      return true;
+    }
+    return false;
+  }
+
+  void incrementRoundAndGoal() {
+    if (round < MAXIMUM_ROUND) {
+      round++;
+      return;
+    }
+    if (round >= MAXIMUM_ROUND) {
+      round = 0;
+      goal++;
+    }
+  }
+
+  void onStartPressed() {
+    timer = Timer.periodic(
+      const Duration(seconds: 1),
+      onTick,
+    );
+    setState(() {
+      isRunning = true;
+    });
+  }
+
+  void onPausePressed() {
+    timer.cancel();
+    setState(() {
+      isRunning = false;
+    });
+  }
+
+  void onResetPressed() {
+    setState(() {
+      isRunning = false;
+    });
+    timer.cancel();
+    resetTimer();
+  }
+
+  Widget timeDisplay(int number) {
     return Column(
       children: [
         Stack(
@@ -88,7 +148,7 @@ class _MainPageState extends State<MainPage> {
               width: 150,
               height: 170,
               child: Text(
-                number,
+                number == 0 ? '00' : number.toString(),
                 style: const TextStyle(
                   color: Colors.deepOrange,
                   fontSize: 80,
@@ -102,7 +162,34 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  void onResetPressed() {}
+  void setTimer(int index) {
+    if (index == 0) {
+      minutes = 15;
+      seconds = 0;
+      TOTAL_MINUTES = 15;
+      TOTAL_SECONDS = 0;
+    } else if (index == 1) {
+      minutes = 20;
+      seconds = 0;
+      TOTAL_MINUTES = 20;
+      TOTAL_SECONDS = 0;
+    } else if (index == 2) {
+      minutes = 25;
+      seconds = 0;
+      TOTAL_MINUTES = 25;
+      TOTAL_SECONDS = 0;
+    } else if (index == 3) {
+      minutes = 30;
+      seconds = 0;
+      TOTAL_MINUTES = 30;
+      TOTAL_SECONDS = 0;
+    } else if (index == 4) {
+      minutes = 35;
+      seconds = 0;
+      TOTAL_MINUTES = 35;
+      TOTAL_SECONDS = 0;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +222,7 @@ class _MainPageState extends State<MainPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              timeDisplay('12'),
+              timeDisplay(minutes),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Column(
@@ -151,7 +238,7 @@ class _MainPageState extends State<MainPage> {
                   ],
                 ),
               ),
-              timeDisplay('00'),
+              timeDisplay(seconds),
             ],
           ),
           const SizedBox(
@@ -161,41 +248,115 @@ class _MainPageState extends State<MainPage> {
             height: 50,
             child: ListView(
               scrollDirection: Axis.horizontal,
-              children: timeSetter(),
+              children: <Widget>[
+                ToggleButtons(
+                  constraints: const BoxConstraints(
+                    minHeight: 40.0,
+                    minWidth: 80.0,
+                  ),
+                  isSelected: selected,
+                  color: Colors.white38,
+                  borderWidth: 4,
+                  borderColor: Colors.white38,
+                  selectedColor: Colors.deepOrange,
+                  selectedBorderColor: Colors.white,
+                  fillColor: Colors.white,
+                  onPressed: (int index) {
+                    setState(() {
+                      for (int i = 0; i < selected.length; i++) {
+                        if (selected[i]) {
+                          selected[i] = false;
+                          break;
+                        }
+                      }
+                      selected[index] = true;
+                    });
+                    setTimer(index);
+                  },
+                  children: const [
+                    Text(
+                      '15',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '20',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '25',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '30',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '35',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                )
+              ],
             ),
           ),
           const SizedBox(
             height: 40,
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               IconButton(
-                onPressed: onResetPressed,
+                color: Colors.black87.withOpacity(0.5),
                 iconSize: 110,
-                icon: const Icon(
-                  Icons.pause_circle_filled,
+                onPressed: isRunning ? onPausePressed : onStartPressed,
+                icon: Icon(
+                  isRunning
+                      ? Icons.pause_circle_outline
+                      : Icons.play_circle_fill_outlined,
                 ),
               ),
+              IconButton(
+                color: Colors.black87.withOpacity(0.5),
+                iconSize: 110,
+                onPressed: onResetPressed,
+                icon: const Icon(
+                  Icons.restore,
+                ),
+              )
             ],
           ),
           const SizedBox(
             height: 50,
           ),
-          const Row(
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Column(
                 children: [
                   Text(
-                    '0/4',
-                    style: TextStyle(
+                    '$round/$MAXIMUM_ROUND',
+                    style: const TextStyle(
                       color: Colors.white38,
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
+                  const Text(
                     'ROUND',
                     style: TextStyle(
                       color: Colors.white,
@@ -208,14 +369,14 @@ class _MainPageState extends State<MainPage> {
               Column(
                 children: [
                   Text(
-                    '0/12',
-                    style: TextStyle(
+                    '$goal/$MAXIMUM_GOAL',
+                    style: const TextStyle(
                       color: Colors.white38,
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
+                  const Text(
                     'GOAL',
                     style: TextStyle(
                       color: Colors.white,
