@@ -110,6 +110,9 @@ class _MainPageState extends State<MainPage> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
+          const SizedBox(
+            height: 30,
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
             child: Row(
@@ -169,24 +172,57 @@ class _MainPageState extends State<MainPage> {
             children: [
               IconButton(
                 onPressed: onResetPressed,
-                iconSize: 90,
+                iconSize: 110,
                 icon: const Icon(
                   Icons.pause_circle_filled,
                 ),
               ),
             ],
           ),
+          const SizedBox(
+            height: 50,
+          ),
           const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Column(
                 children: [
-                  Center(child: Text('ROUND')),
+                  Text(
+                    '0/4',
+                    style: TextStyle(
+                      color: Colors.white38,
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'ROUND',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
               Column(
                 children: [
-                  Text('GOAL'),
+                  Text(
+                    '0/12',
+                    style: TextStyle(
+                      color: Colors.white38,
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'GOAL',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ],
